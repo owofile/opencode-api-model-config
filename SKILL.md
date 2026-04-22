@@ -1,86 +1,86 @@
 ---
 name: api-model-config
 description: |
-  添加、更新、管理模型API配置。当用户提到以下情况时使用：
-  - "添加API"、"配置API"、"添加模型"、"添加provider"
-  - "更新模型列表"、"添加新模型"
-  - "修改API key"、"更新key"、"更换API"
-  - "查看当前配置"、"查看已有模型"
-  - "xx模型的API怎么添加"、"我想用xx模型"
-  - 中转API、代理API配置
-  - 任何关于 opencode 模型的配置需求
+  Add, update, and manage model API configurations for OpenCode. Use when the user mentions:
+  - "add API", "configure API", "add model", "add provider"
+  - "update model list", "add new model"
+  - "change API key", "update key", "switch API"
+  - "view current config", "list existing models"
+  - "how to add API for xx model", "I want to use xx model"
+  - proxy API, gateway API configuration
+  - any OpenCode model configuration needs
 ---
 
 # API Model Config Skill
 
-管理 OpenCode 的模型 API 配置，包括添加、更新、修改 provider 和模型。
+Manage OpenCode's model API configurations, including adding, updating, and modifying providers and models.
 
-## 配置文件
+## Config Files
 
-| 文件 | 路径 | 用途 |
-|------|------|------|
-| provider 配置 | `~/.config/opencode/opencode.json` | baseURL、模型列表 |
-| 凭证存储 | `~/.local/share/opencode/auth.json` | API keys |
+| File | Path | Purpose |
+|------|------|---------|
+| Provider config | `~/.config/opencode/opencode.json` | baseURL, model list |
+| Credentials | `~/.local/share/opencode/auth.json` | API keys |
 
-## Provider ID 命名规范
+## Provider ID Naming Rules
 
-### 命名规则
+### Naming Conventions
 
-| 类型 | 规则 | 示例 |
-|------|------|------|
-| 普通/基础版 | 简洁小写单词 | `minimax`, `deepseek`, `zhipu` |
-| 套餐/特殊版 | 驼峰命名 | `minimaxPlan`, `openaiPro` |
-| 中转/代理 | 描述性名称 | `siliconflow`, `baishan` |
+| Type | Rule | Example |
+|------|------|---------|
+| Standard/Basic | Simple lowercase word | `minimax`, `deepseek`, `zhipu` |
+| Plan/Premium | CamelCase | `minimaxPlan`, `openaiPro` |
+| Proxy/Gateway | Descriptive name | `siliconflow`, `baishan` |
 
-### 命名禁忌
+### Naming Restrictions
 
-- 避免模糊词汇：`coding`, `pro`, `plus`, `plan`（单独使用）
-- 避免全小写连字符：`minimax-plan` → 应为 `minimaxPlan`
-- 避免过长名称
+- Avoid vague words: `coding`, `pro`, `plus`, `plan` (standalone)
+- Avoid lowercase with hyphens: `minimax-plan` → use `minimaxPlan`
+- Avoid overly long names
 
-### 正反对比
+### Good vs Bad
 
 ```json
-// 错误
+// Wrong
 "minimax-cn-coding-plan": { }
 "openai-pro": { }
 "zhipu-plan": { }
 
-// 正确
+// Correct
 "minimax": { }
 "minimaxPlan": { }
 ```
 
-## 核心操作
+## Core Operations
 
-### 查询当前配置
+### Query Current Config
 
 ```bash
 cat ~/.config/opencode/opencode.json
 cat ~/.local/share/opencode/auth.json | jq 'map_values(.key = "***")'
 ```
 
-### 添加 Provider
+### Add Provider
 
-**opencode.json** 添加 provider：
+**opencode.json** - add provider:
 ```json
 {
   "provider": {
     "provider-id": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "显示名称",
+      "name": "Display Name",
       "options": {
         "baseURL": "https://api.example.com/v1"
       },
       "models": {
-        "model-id": { "name": "模型显示名" }
+        "model-id": { "name": "Model Display Name" }
       }
     }
   }
 }
 ```
 
-**auth.json** 添加凭证：
+**auth.json** - add credentials:
 ```json
 {
   "provider-id": {
@@ -90,25 +90,25 @@ cat ~/.local/share/opencode/auth.json | jq 'map_values(.key = "***")'
 }
 ```
 
-### 更新模型列表
+### Update Model List
 
-在已有 provider 下添加模型：
+Add models to existing provider:
 
 ```json
 {
   "provider": {
     "existing-provider": {
       "models": {
-        "new-model": { "name": "新模型" }
+        "new-model": { "name": "New Model" }
       }
     }
   }
 }
 ```
 
-### 修改 API Key
+### Modify API Key
 
-编辑 `auth.json`：
+Edit `auth.json`:
 ```json
 {
   "provider-id": {
@@ -118,27 +118,27 @@ cat ~/.local/share/opencode/auth.json | jq 'map_values(.key = "***")'
 }
 ```
 
-### 删除 Provider
+### Delete Provider
 
-从两个文件中**同时**删除对应条目。
+Delete corresponding entries from **both** files simultaneously.
 
-### 重命名 Provider（重要）
+### Rename Provider (Important)
 
-**必须同步修改两个文件：**
-1. `opencode.json` 中的 provider ID
-2. `auth.json` 中的 provider ID（必须一致）
-3. `opencode.json` 中的 `model` 字段（如引用了该 provider）
+**Must update both files synchronously:**
+1. Provider ID in `opencode.json`
+2. Provider ID in `auth.json` (must match)
+3. `model` field in `opencode.json` (if it references this provider)
 
-## 常见 Provider 模板
+## Common Provider Templates
 
-### Anthropic 兼容 API（套餐版）
+### Anthropic-compatible API (Plan/Premium)
 
 ```json
 {
   "provider": {
     "minimaxPlan": {
       "npm": "@ai-sdk/anthropic",
-      "name": "MiniMax 套餐",
+      "name": "MiniMax Plan",
       "options": {
         "baseURL": "https://api.minimaxi.com/anthropic/v1"
       },
@@ -150,14 +150,14 @@ cat ~/.local/share/opencode/auth.json | jq 'map_values(.key = "***")'
 }
 ```
 
-### OpenAI 兼容 API（普通版）
+### OpenAI-compatible API (Standard)
 
 ```json
 {
   "provider": {
     "minimax": {
       "npm": "@ai-sdk/openai-compatible",
-      "name": "MiniMax 普通API",
+      "name": "MiniMax Standard API",
       "options": {
         "baseURL": "https://api.minimax.chat/v1"
       },
@@ -171,61 +171,60 @@ cat ~/.local/share/opencode/auth.json | jq 'map_values(.key = "***")'
 }
 ```
 
-### 国内常用 Provider
+### Common Domestic Providers
 
-**智谱 AI**：baseURL `https://open.bigmodel.cn/api/paas/v4`，npm `@ai-sdk/openai-compatible`
+| Provider | baseURL | npm |
+|----------|---------|-----|
+| Zhipu AI | `https://open.bigmodel.cn/api/paas/v4` | `@ai-sdk/openai-compatible` |
+| DeepSeek | `https://api.deepseek.com/v1` | `@ai-sdk/openai-compatible` |
+| SiliconFlow | `https://api.siliconflow.cn/v1` | `@ai-sdk/openai-compatible` |
+| Moonshot | `https://api.moonshot.cn/v1` | `@ai-sdk/openai-compatible` |
 
-**DeepSeek**：baseURL `https://api.deepseek.com/v1`，npm `@ai-sdk/openai-compatible`
+## Get Models Supported by Provider
 
-**硅基流动**：baseURL `https://api.siliconflow.cn/v1`，npm `@ai-sdk/openai-compatible`
+1. Visit official documentation's API/Models page
+2. Confirm baseURL and model ID
 
-**Moonshot**：baseURL `https://api.moonshot.cn/v1`，npm `@ai-sdk/openai-compatible`
-
-## 获取 Provider 支持的模型
-
-1. 访问官方文档的 API/Models 页面
-2. 确认 baseURL 和模型 ID
-
-常用文档：
-| Provider | 文档地址 |
-|----------|----------|
+Common docs:
+| Provider | Documentation |
+|----------|---------------|
 | MiniMax | https://platform.minimaxi.com/docs |
-| 智谱 AI | https://open.bigmodel.cn/dev/api |
+| Zhipu AI | https://open.bigmodel.cn/dev/api |
 | DeepSeek | https://platform.deepseek.com/docs |
-| 硅基流动 | https://docs.siliconflow.cn |
+| SiliconFlow | https://docs.siliconflow.cn |
 
-## 验证配置
+## Verify Config
 
 ```bash
 opencode
 /models
 ```
 
-确认 provider 和模型出现在列表中。
+Confirm provider and models appear in the list.
 
-## 故障排除
+## Troubleshooting
 
-| 错误现象 | 可能原因 | 解决方案 |
-|----------|----------|----------|
-| 模型不出现 | JSON 语法错误、provider ID 不一致 | 检查两个文件的 provider ID 是否一致 |
-| 认证失败 | API key 错误或过期 | 检查 auth.json 中的 key |
-| 连接超时 | baseURL 不可访问 | 浏览器打开 baseURL 确认 |
-| 重复的 provider | 手动编辑时未删除旧配置 | 清理重复配置 |
-| 套餐API不显示 | provider ID 命名不规范 | 用驼峰如 `minimaxPlan` |
+| Symptom | Cause | Solution |
+|---------|-------|----------|
+| Model not showing | JSON syntax error, provider ID mismatch | Check if provider IDs match in both files |
+| Auth failed | API key incorrect or expired | Check key in auth.json |
+| Connection timeout | baseURL unreachable | Open baseURL in browser to confirm |
+| Duplicate provider | Old config not removed when manually editing | Clean up duplicate configs |
+| Plan API not showing | Provider ID naming non-standard | Use CamelCase like `minimaxPlan` |
 
-### 环境变量检查
+### Environment Variable Check
 
-某些 provider（如 MiniMax 套餐）需清除 Anthropic 环境变量：
+Some providers (like MiniMax Plan) require clearing Anthropic env vars:
 ```bash
 env | grep -i anthropic
-# 如有 ANTHROPIC_AUTH_TOKEN 或 ANTHROPIC_BASE_URL，需清除
+# If ANTHROPIC_AUTH_TOKEN or ANTHROPIC_BASE_URL exists, clear them
 ```
 
-## 配置检查清单
+## Config Checklist
 
-- [ ] provider ID 命名符合规范
-- [ ] 两个文件中的 provider ID 完全一致
-- [ ] 无重复的 provider 配置
-- [ ] 无多余括号或逗号
-- [ ] baseURL 格式正确（`/v1` 或 `/anthropic/v1`）
-- [ ] npm 包类型正确（`@ai-sdk/openai-compatible` 或 `@ai-sdk/anthropic`）
+- [ ] Provider ID naming follows convention
+- [ ] Provider IDs match exactly in both files
+- [ ] No duplicate provider configs
+- [ ] No extra brackets or commas
+- [ ] baseURL format correct (`/v1` or `/anthropic/v1`)
+- [ ] npm package type correct (`@ai-sdk/openai-compatible` or `@ai-sdk/anthropic`)
